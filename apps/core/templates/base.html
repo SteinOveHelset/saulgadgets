@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="utf-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1">
-		<title>Saul Gadgets</title>
+		<title>{% block title %}{% endblock %}Saul Gadgets</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
 	</head>
 
@@ -23,8 +23,11 @@
 				<div class="navbar-end">
                     {% for category in menu_categories %}
                         <a href="{% url 'category_detail' category.slug %}" class="navbar-item">{{ category.title }}</a>
-                    {% endfor %}
-					<a href="{% url 'contact' %}" class="navbar-item">Contact</a>
+					{% endfor %}
+					
+					<div class="navbar-item">
+						<a href="{% url 'cart' %}" class="button is-primary">Cart</a>
+					</div>
 				</div>
 			</div>
 		</nav>
@@ -33,5 +36,18 @@
 			{% block content %}
             {% endblock %}
 		</section>
+
+		<footer class="footer">
+			<div class="columns">
+				<div class="column is-4">
+					<h2 class="subtitle">Saul Gadgets</h2>
+				</div>
+
+				<div class="column is-8">
+					<a href="{% url 'contact' %}" class="navbar-item">Contact</a>
+					<a href="{% url 'about' %}" class="navbar-item">About</a>
+				</div>
+			</div>
+		</footer>
 	</body>
 </html>
