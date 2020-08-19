@@ -15,6 +15,8 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path
+from django.conf import settings
+from django.conf.urls.static import static
 
 from apps.cart.views import cart_detail
 from apps.core.views import frontpage, contact, about
@@ -38,4 +40,4 @@ urlpatterns = [
 
     path('<slug:category_slug>/<slug:slug>/', product_detail, name='product_detail'),
     path('<slug:slug>/', category_detail, name='category_detail'),
-]
+] + static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

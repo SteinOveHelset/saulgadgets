@@ -1,3 +1,4 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 	<head>
@@ -5,6 +6,7 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1">
 		<title>{% block title %}{% endblock %}Saul Gadgets</title>
 		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bulma@0.9.0/css/bulma.min.css">
+		<link rel="stylesheet" href="{% static 'main.css' %}">
 	</head>
 
 	<body>
@@ -55,11 +57,15 @@
 		<script>
 			var store = new Vuex.Store({
 				state: {
-					numItems: {{ cart.get_total_length }}
+					numItems: {{ cart.get_total_length }},
+					totalCost: {{ cart.get_total_cost }}
 				},
 				mutations: {
 					increment(state, quantity) {
 						state.numItems += quantity;
+					},
+					changeTotalCost(state, newCost) {
+						state.totalCost += newCost
 					}
 				}
 			});
@@ -70,6 +76,8 @@
 				store: store,
 				computed: {
 					numItems: function() {
+						console.log('asdf');
+						console.log(store.state.numItems)
 						return store.state.numItems
 					}
 				}
