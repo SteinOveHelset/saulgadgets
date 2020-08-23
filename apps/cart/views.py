@@ -22,4 +22,7 @@ def cart_detail(request):
     return render(request, 'cart.html', context)
 
 def success(request):
+    cart = Cart(request)
+    cart.clear()
+    
     return render(request, 'success.html')

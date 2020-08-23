@@ -36,13 +36,11 @@ class Cart(object):
         print('Product_id:', product_id)
 
         if product_id not in self.cart:
-            print('test 1')
             self.cart[product_id] = {'quantity': 0, 'price': price, 'id': product_id}
         
         if update_quantity:
             self.cart[product_id]['quantity'] = quantity
         else:
-            print('test 2')
             self.cart[product_id]['quantity'] = self.cart[product_id]['quantity'] + 1
         
         self.save()
@@ -53,7 +51,6 @@ class Cart(object):
             self.save()
 
     def save(self):
-        print('save')
         self.session[settings.CART_SESSION_ID] = self.cart
         self.session.modified = True
     

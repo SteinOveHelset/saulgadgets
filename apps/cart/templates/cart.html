@@ -182,7 +182,8 @@
                             'Content-Type': 'application/json',
                             'X-CSRFToken': '{{ csrf_token }}'
                         },
-                        credentials: 'same-origin'
+                        credentials: 'same-origin',
+                        body: JSON.stringify(data)
                     })
                     .then(function(response) {
                         return response.json()
