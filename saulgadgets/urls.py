@@ -23,6 +23,7 @@ from apps.cart.views import cart_detail, success
 from apps.core.views import frontpage, contact, about
 from apps.store.views import product_detail, category_detail
 
+from apps.coupon.api import api_can_use
 from apps.store.api import api_add_to_cart, api_remove_from_cart, api_checkout, create_checkout_session
 
 urlpatterns = [
@@ -36,6 +37,7 @@ urlpatterns = [
 
     # API
 
+    path('api/can_use/', api_can_use, name='api_can_use'),
     path('api/create_checkout_session/', create_checkout_session, name='create_checkout_session'),
     path('api/add_to_cart/', api_add_to_cart, name='api_add_to_cart'),
     path('api/remove_from_cart/', api_remove_from_cart, name='api_remove_from_cart'),

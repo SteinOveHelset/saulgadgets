@@ -33,11 +33,27 @@
                                 <td></td>
                                 <td>[[ totalCost ]]</td>
                             </tr>
+
+                            <tr v-if="coupon_value">
+                                <td colspan="3">Total cost with coupon:</td>
+                                <td>[[ totalCostWithCoupon ]]</td>
+                            </tr>
                         </tfoot>
                     </table>
+
+                    <hr>
+
+                    <input type="hidden" v-model="coupon_value"><br>
+
+                    Coupon code:<br>
+                    <input type="text" v-model="coupon_code"><br>
+
+                    <button @click="applyCoupon()">Apply</button>
+
+                    <hr>
                 </div>
 
-                <form v-on:submit.prevent="submitForm()">
+                <form v-on:submit.prevent="buy()">
                     <div class="field">
                         <div class="control">
                             <label>First name</label>
@@ -104,8 +120,6 @@
                 </div>
             </article>
         </div>
-
-        <button @click="buy()">Check out</button>
     </div>
 {% endblock %}
 
@@ -125,7 +139,9 @@
                 address: '',
                 zipcode: '',
                 place: '',
-                products: [{{ productsstring|safe }}]
+                products: [{{ productsstring|safe }}],
+                coupon_value: 0,
+                coupon_code: ''
             }
         },
         computed: {
@@ -134,9 +150,33 @@
             },
             totalCost: function() {
                 return store.state.totalCost
+            },
+            totalCostWithCoupon: function() {
+                if (this.coupon_value > 0) {
+                    return store.state.totalCost * (parseInt(this.coupon_value) / 100);
+                } else {
+                    return store.state.totalCost;
+                }
             }
         },
         methods: {
+            applyCoupon() {
+                if (this.coupon_code !== '') {
+                    fetch('/api/can_use/?coupon_code=' + this.coupon_code, {
+                        method: 'GET'
+                    })
+                    .then((response) => {
+                        return response.json();
+                    })
+                    .then((data) => {
+                        if (data.amount) {
+                            this.coupon_value = parseInt(data.amount)
+                        } else {
+                            this.coupon_value = 0
+                        }
+                    });
+                }
+            },
             buy() {
                 var data = {
                     'first_name': this.first_name,
@@ -144,7 +184,8 @@
                     'email': this.email,
                     'address': this.address,
                     'zipcode': this.zipcode,
-                    'place': this.place
+                    'place': this.place,
+                    'coupon_code': this.coupon_code
                 };
 
                 this.errors = [];
@@ -200,38 +241,6 @@
                         console.log('Error:', error);
                     });
                 }
-            },
-            submitForm() {
-                console.log('Submit form');
-
-                var data = {
-                    'first_name': this.first_name,
-                    'last_name': this.last_name,
-                    'email': this.email,
-                    'address': this.address,
-                    'zipcode': this.zipcode,
-                    'place': this.place
-                };
-
-                fetch('/api/checkout/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify(data)
-                })
-                .then((response) => {
-                    console.log('Success');
-                    console.log(response);
-
-                    window.location.href = '/';
-                })
-                .catch(function (error) {
-                    console.log('Error 2');
-                    console.log(error);
-                })
             },
             incrementQuantity(product_id, quantity, price) {
                 console.log('Product_id:', product_id);
