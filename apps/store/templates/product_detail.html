@@ -4,7 +4,7 @@
 
 {% block content %}
     <div id="productapp">
-        <img src="/{{ product.image }}">
+        <img src="{{ product.image.url }}">
         <hr>
         <h1 class="title">{{ product.title }}</h1>
         <h2 class="subtitle">${{ product.price }}</h2>
@@ -14,6 +14,12 @@
         {% endif %}
 
         <button @click="addToCart({{ product.id }})">Add to cart</button>
+
+        <article class="message is-success" v-if="showMessage">
+            <div class="message-body">
+                The product was added to the cart!
+            </div>
+        </article>
     </div>
 {% endblock %}
 
@@ -25,7 +31,7 @@
         store: store,
         data () {
             return {
-
+                showMessage: false
             }
         },
         mounted() {
@@ -53,7 +59,13 @@
                 .then((response) => {
                     console.log(response)
 
+                    this.showMessage = true
+
                     store.commit('increment', 1);
+
+                    setTimeout(() => {
+                        this.showMessage = false
+                    }, 2000)
                 })
                 .catch(function (error) {
                     console.log('Error 2');
