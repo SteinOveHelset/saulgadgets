@@ -10,24 +10,38 @@
 	</head>
 
 	<body>
-		<nav class="navbar is-dark">
+		<nav class="navbar is-dark" id="navbarapp">
 			<div class="navbar-brand">
 				<a class="navbar-item" href="{% url 'frontpage' %}">Saul Gadgets</a>
 
-				<a role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="main-navbar">
+				<a @click="toggleMenu()" role="button" class="navbar-burger burger" aria-label="menu" aria-expanded="false" data-target="main-navbar">
 					<span aria-hidden="true"></span>
 					<span aria-hidden="true"></span>
 					<span aria-hidden="true"></span>
 				</a>
 			</div>
 
-			<div id="main-navbar" class="navbar-menu">
+			<div id="main-navbar" class="navbar-menu" :class="{ 'is-active': menuClass }">
+				<div class="navbar-start">
+					<div class="navbar-item">
+						<form method="get" action="{% url 'search' %}">
+							<div class="field has-addons">
+								<div class="control">
+									<input type="text" class="input" placeholder="Search..." name="query">
+								</div>
+								<div class="control">
+									<button class="button is-success">Search</button>
+								</div>
+							</div>
+						</form>
+					</div>
+				</div>
 				<div class="navbar-end">
                     {% for category in menu_categories %}
                         <a href="{% url 'category_detail' category.slug %}" class="navbar-item">{{ category.title }}</a>
 					{% endfor %}
 					
-					<div class="navbar-item" id="navbarapp">
+					<div class="navbar-item">
 						<a href="{% url 'cart' %}" class="button is-primary">Cart ([[ numItems ]])</a>
 					</div>
 				</div>
@@ -74,9 +88,21 @@
 				el: '#navbarapp',
 				delimiters: ['[[', ']]'],
 				store: store,
+				data () {
+					return {
+						menuClass: false
+					}
+				},
 				computed: {
 					numItems: function() {
 						return store.state.numItems
+					}
+				},
+				methods: {
+					toggleMenu() {
+						console.log('toggleMenu');
+
+						this.menuClass = !this.menuClass;
 					}
 				}
 			});
