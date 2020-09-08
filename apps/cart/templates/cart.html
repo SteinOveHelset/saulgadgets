@@ -255,40 +255,50 @@
             incrementQuantity(product_id, quantity, price) {
                 console.log('Product_id:', product_id);
 
-                var data = {
-                    'product_id': product_id, 
-                    'update': true,
-                    'quantity': parseInt(quantity) + 1
-                };
+                for (var i = 0; i < this.products.length; i++) {
+                    var product = this.products[i];
 
-                store.commit('increment', 1);
-                store.commit('changeTotalCost', parseFloat(price));
-                    
-                fetch('/api/add_to_cart/', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-CSRFToken': '{{ csrf_token }}'
-                    },
-                    credentials: 'same-origin',
-                    body: JSON.stringify(data)
-                })
-                .then((response) => {
-                    console.log(response)
+                    if (product.id === product_id) {
+                        if (quantity < product.num_available) {
+                            var data = {
+                                'product_id': product_id, 
+                                'update': true,
+                                'quantity': parseInt(quantity) + 1
+                            };
 
-                    for (var i = 0; i < this.products.length; i++) {
-                        var product = this.products[i];
-   
-                        if (product.id === product_id) {
-                            this.products[i].quantity = parseInt(this.products[i].quantity) + 1;
-                            this.products[i].total_price = parseInt(this.products[i].quantity) * parseFloat(this.products[i].price)
+                            store.commit('increment', 1);
+                            store.commit('changeTotalCost', parseFloat(price));
+                                
+                            fetch('/api/add_to_cart/', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'X-CSRFToken': '{{ csrf_token }}'
+                                },
+                                credentials: 'same-origin',
+                                body: JSON.stringify(data)
+                            })
+                            .then((response) => {
+                                console.log(response)
+
+                                for (var i = 0; i < this.products.length; i++) {
+                                    var product = this.products[i];
+            
+                                    if (product.id === product_id) {
+                                        this.products[i].quantity = parseInt(this.products[i].quantity) + 1;
+                                        this.products[i].total_price = parseInt(this.products[i].quantity) * parseFloat(this.products[i].price)
+                                    }
+                                }
+                            })
+                            .catch(function (error) {
+                                console.log('Error 2');
+                                console.log(error);
+                            })
+                        } else {
+                            alert('No more available in stock!');
                         }
-                    }
-                })
-                .catch(function (error) {
-                    console.log('Error 2');
-                    console.log(error);
-                })
+                    } 
+                }
             },
             decrementQuantity(product_id, quantity, price) {
                 console.log('Product_id:', product_id);
