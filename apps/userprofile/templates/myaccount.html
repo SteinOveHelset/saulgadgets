@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <h1 class="title">My account</h1>
+
+    <a href="{% url 'logout' %}" class="button is-danger">Log out</a>
+
+    <hr>
+
+    <h2 class="subtitle">Account information</h2>
+
+    <p><strong>Name: </strong>{{ request.user.get_full_name }}</p>
+    <p><strong>E-mail: </strong>{{ request.user.email }}</p>
+
+    <hr>
+
+    <h2 class="subtitle">My orders</h2>
+
+    {% for order in request.user.orders.all %}
+        <article class="message is-light">
+            <div class="message-header">
+                <p>{{ order.created_at }}</p>
+                <p><strong>Status: </strong>{{ order.status }}</p>
+            </div>
+
+            <div class="message-body">
+                <table class="table is-striped is-fullwidth">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                        </tr>
+                    </thead>
+
+                    <tbody>
+                        {% for item in order.items.all %}
+                            <tr>
+                                <td>{{ item.product.title }}</td>
+                                <td>{{ item.quantity }}</td>
+                                <td>{{ item.price }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <tfoot>
+                        <tr>
+                            <td>Total</td>
+                            <td>{{ order.get_total_quantity }}</td>
+                            <td>{{ order.paid_amount }}</td>
+                        </tr>
+                    </tfoot>
+                </table>
+            </div>
+        </article>
+    {% empty %}
+        <p>You don't have any order yet...</p>
+    {% endfor %}
+{% endblock %}

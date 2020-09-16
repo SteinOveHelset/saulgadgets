@@ -63,6 +63,12 @@
                     <hr>
                 </div>
 
+                {% if not request.user.is_authenticated %}
+                    <p>Continue as guest or <a href="{% url 'login' %}">log in</a> / <a href="{% url 'signup' %}">sign up</a>.</p>
+
+                    <hr>
+                {% endif %}
+
                 <form v-on:submit.prevent="buy()">
                     <div class="field">
                         <div class="control">
@@ -143,9 +149,9 @@
         data () {
             return {
                 errors: [],
-                first_name: '',
-                last_name: '',
-                email: '',
+                first_name: '{{ first_name }}',
+                last_name: '{{ last_name }}',
+                email: '{{ email }}',
                 address: '',
                 zipcode: '',
                 place: '',
