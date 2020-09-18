@@ -9,7 +9,7 @@
         {% if cart %}
             <div v-if="products.length > 0">
                 <div class="table">
-                    <table class="table">
+                    <table class="table is-fullwidth is-striped">
                         <thead>
                             <th></th>
                             <th>Product</th>
@@ -32,7 +32,7 @@
                                 </td>
                                 <td><button @click="decrementQuantity(product.id, product.quantity, product.price)">-</button> [[ product.quantity ]] <button @click="incrementQuantity(product.id, product.quantity, product.price)">+</button></td>
                                 <td>[[ product.total_price ]]</td>
-                                <td><button @click="removeFromCart(product.id)">Remove from cart</button></td>
+                                <td><button @click="removeFromCart(product.id)" class="button is-danger">Remove</button></td>
                             </tr>
                         </tbody>
 
@@ -53,12 +53,23 @@
 
                     <hr>
 
-                    <input type="hidden" v-model="coupon_value"><br>
+                    <input type="hidden" v-model="coupon_value">
 
-                    Coupon code:<br>
-                    <input type="text" v-model="coupon_code"><br>
+                    <h2 class="subtitle">Coupon code</h2>
 
-                    <button @click="applyCoupon()">Apply</button>
+                    <div class="field has-addons">
+                        <div class="control">
+                            <input type="text" v-model="coupon_code" class="input">
+                        </div>
+
+                        <div class="control">
+                            <button @click="applyCoupon()" class="button is-success">Apply</button>
+                        </div>
+                    </div>
+
+                    <div class="notification is-warning" v-if="showCouponCodeError">
+                        <p>The coupon code is not valid!</p>
+                    </div>
 
                     <hr>
                 </div>
@@ -70,48 +81,62 @@
                 {% endif %}
 
                 <form v-on:submit.prevent="buy()">
-                    <div class="field">
-                        <div class="control">
-                            <label>First name</label>
-                            <input type="text" name="first_name" v-model="first_name">
+                    <h2 class="title">Contact information</h2>
+
+                    <div class="columns">
+                        <div class="column is-6">
+                            <div class="field">
+                                <label>First name</label>
+        
+                                <div class="control">
+                                    <input class="input" type="text" name="first_name" v-model="first_name">
+                                </div>
+                            </div>
+        
+                            <div class="field">
+                                <label>Last name</label>
+        
+                                <div class="control">
+                                    <input class="input" type="text" name="last_name" v-model="last_name">
+                                </div>
+                            </div>
+        
+                            <div class="field">
+                                <label>E-mail</label>
+        
+                                <div class="control">
+                                    <input class="input" type="text" name="email" v-model="email">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="column is-6">
+                            <div class="field">
+                                <label>Address</label>
+        
+                                <div class="control">
+                                    <input class="input" type="text" name="address" v-model="address">
+                                </div>
+                            </div>
+        
+                            <div class="field">
+                                <label>Zip code</label>
+        
+                                <div class="control">
+                                    <input class="input" type="text" name="zipcode" v-model="zipcode">
+                                </div>
+                            </div>
+        
+                            <div class="field">
+                                <label>Place</label>
+        
+                                <div class="control">
+                                    <input class="input" type="text" name="place" v-model="place">
+                                </div>
+                            </div>
                         </div>
                     </div>
-
-                    <div class="field">
-                        <div class="control">
-                            <label>Last name</label>
-                            <input type="text" name="last_name" v-model="last_name">
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <div class="control">
-                            <label>E-mail</label>
-                            <input type="text" name="email" v-model="email">
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <div class="control">
-                            <label>Address</label>
-                            <input type="text" name="address" v-model="address">
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <div class="control">
-                            <label>Zip code</label>
-                            <input type="text" name="zipcode" v-model="zipcode">
-                        </div>
-                    </div>
-
-                    <div class="field">
-                        <div class="control">
-                            <label>Place</label>
-                            <input type="text" name="place" v-model="place">
-                        </div>
-                    </div>
-
+                    
                     <div class="field">
                         <div class="control">
                             <button class="button is-primary">Check out</button>
@@ -157,7 +182,8 @@
                 place: '',
                 products: [{{ productsstring|safe }}],
                 coupon_value: 0,
-                coupon_code: ''
+                coupon_code: '',
+                showCouponCodeError: false
             }
         },
         computed: {
@@ -186,11 +212,15 @@
                     })
                     .then((data) => {
                         if (data.amount) {
+                            this.showCouponCodeError = false
                             this.coupon_value = parseInt(data.amount)
                         } else {
                             this.coupon_value = 0
+                            this.showCouponCodeError = true
                         }
                     });
+                } else {
+                    this.showCouponCodeError = true
                 }
             },
             buy() {
