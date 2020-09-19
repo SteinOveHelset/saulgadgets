@@ -1,17 +1,43 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1 class="title">Log in</h1>
+<div class="columns">
+    <div class="column is-6 is-offset-3">
+        <h1 class="title">Log in</h1>
 
-    <form method="post" action=".">
-        {% csrf_token %}
-
-        {{ form.as_p }}
-
-        <div class="field">
-            <div class="control">
-                <button class="button is-success">Log in</button>
+        <form method="post" action=".">
+            {% csrf_token %}
+    
+            <input type="hidden" name="next" value="{{ next }}">
+    
+            <div class="field">
+                <label>Username</label>
+    
+                <div clas="control">
+                    <input type="text" class="input" name="username" id="id_username">
+                </div>
             </div>
-        </div>
-    </form>
+    
+            <div class="field">
+                <label>Password</label>
+                
+                <div clas="control">
+                    <input type="password" class="input" name="password" id="id_password">
+                </div>
+            </div>
+    
+            {% if form.errors %}
+                <div class="notification is-danger">
+                    Your username and password didn't match! Please try again!
+                </div>
+            {% endif %}
+    
+            <div class="field">
+                <div class="control">
+                    <button class="button is-success">Log in</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
 {% endblock %}
