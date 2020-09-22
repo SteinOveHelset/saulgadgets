@@ -1,3 +1,5 @@
+import random
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.db.models import Q
 
@@ -19,6 +21,11 @@ def search(request):
 def product_detail(request, category_slug, slug):
     product = get_object_or_404(Product, slug=slug)
 
+    related_products = list(product.category.products.filter(parent=None).exclude(id=product.id))
+    
+    if len(related_products) >= 3:
+        related_products = random.sample(related_products, 3)
+
     if product.parent:
         return redirect('product_detail', category_slug=category_slug, slug=product.parent.slug)
 
@@ -36,7 +43,8 @@ def product_detail(request, category_slug, slug):
 
     context = {
         'product': product,
-        'imagesstring': imagesstring
+        'imagesstring': imagesstring,
+        'related_products': related_products
     }
 
     return render(request, 'product_detail.html', context)

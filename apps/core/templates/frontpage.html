@@ -3,29 +3,7 @@
 {% block title %}Welcome | {% endblock %}
 
 {% block content %}
-    <div class="columns is-multiline">
-        {% for product in products %}
-            <div class="column is-3">
-                <div class="card">
-                    <div class="card-image">
-                        <figure class="image">
-                            <img src="{{ product.thumbnail.url }}">
-                        </figure>
-                    </div>
-                    <div class="card-content">
-                        <div class="media">
-                            <div class="media-content">
-                                <p class="title is-4">{{ product.title }}</p>
-                                <p class="subtitle is-6">${{ product.price }}</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <footer class="card-footer">
-                        <a href="{% url 'product_detail' product.category.slug product.slug %}" class="card-footer-item">View</a>
-                    </footer>
-                </div>
-            </div>
-        {% endfor %}
-    </div>
+    {% with products as list_products %}
+        {% include 'parts/product_list.html' %}
+    {% endwith %}
 {% endblock %}
