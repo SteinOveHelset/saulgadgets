@@ -24,7 +24,7 @@
         {% endif %}
         <hr>
         <h1 class="title">{{ product.title }}</h1>
-        <h2 class="subtitle">${{ product.price }}</h2>
+        <h2 class="subtitle">${{ product.price }}, Stars: {{ product.get_rating|floatformat:1 }}</h2>
 
         {% if product.description %}
             <p>{{ product.description }}</p>
@@ -119,6 +119,67 @@
         {% with related_products as list_products %}
             {% include 'parts/product_list.html' %}
         {% endwith %}
+
+        <hr>
+
+        <h2 class="subtitle">Reviews</h2>
+
+        <div class="reviews-wrapper">
+            {% for review in product.reviews.all %}
+                <div class="notification space-below">
+                    <p>
+                        <strong>Date: </strong>{{ review.date_added|date:"Y-m-d" }},
+                        <strong>Stars: </strong>{{ review.stars }}
+                    </p>
+
+                    {{ review.content }}
+                </div>
+            {% empty %}
+                <div class="notification space-below">
+                    No reviews yet...
+                </div>
+            {% endfor %}
+        </div>
+
+        <div class="notification space-below">
+            {% if request.user.is_authenticated %}
+                <form method="post" action=".">
+                    {% csrf_token %}
+
+                    <div class="field">
+                        <label>Stars</label>
+
+                        <div clas="control">
+                            <div class="select">
+                                <select name="stars">
+                                    <option value="1">1</option>
+                                    <option value="2">2</option>
+                                    <option value="3" selected>3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <label>Content</label>
+
+                        <div class="control">
+                            <textarea class="textarea" name="content"></textarea>
+                        </div>
+                    </div>
+
+                    <div class="field">
+                        <div class="control">
+                            <button class="button is-success">Submit</button>
+                        </div>
+                    </div>
+                </form>
+            {% else %}
+                <p>Please sign in to add review!</p>
+            {% endif %}
+        </div>
     </div>
 {% endblock %}
 

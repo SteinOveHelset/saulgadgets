@@ -20,3 +20,7 @@ form ul {
     .newsletter-wrapper .field.has-addons {
         justify-content: center;
     }
+
+.notification.space-below {
+    margin-bottom: 20px;
+}
