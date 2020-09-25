@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+
+<html>
+    <head>
+        <title>Order Pdf</title>
+
+        <style type="text/css">
+            body {
+                font-size: 14px;
+            }
+
+            tr.head td,
+            tr.footer td {
+                padding-top: 10px;
+                padding-bottom: 10px;
+                font-size: 18px;
+                font-weight: bold;
+                background-color: #f9f9f9;
+            }
+
+            tr.footer td {
+                font-size: 14px;
+            }
+
+            tr.item td {
+                padding-top: 3px;
+                padding-bottom: 3px;
+                font-size: 14px;;
+            }
+        </style>
+    </head>
+
+    <body>
+        <div class="wrapper">
+            <h1>Invoice #{{ order.id }}</h1>
+
+            <h2>Shipping address</h2>
+
+            <p>
+                {{ order.first_name }} {{ order.last_name }}<br>
+                {{ order.address }}<br>
+                {{ order.zipcode }} {{ order.place }}
+            </p>
+
+            <h2>Products</h2>
+
+            <table cellpadding="0" cellspacing="0">
+                <tr class="head">
+                    <td></td>
+                    <td>Name</td>
+                    <td>Price</td>
+                    <td>Quantity</td>
+                    <td>Total</td>
+                </tr>
+
+                {% for item in order.items.all %}
+                    <tr class="item">
+                        <td>
+                            {% if item.product.thumbnail.url %}
+                                <img src="http://127.0.0.1:8000{{ item.product.thumbnail.url }}" width="40">
+                            {% endif %}
+                        </td>
+                        <td>{{ item.product.title }}</td>
+                        <td>{{ item.product.price }}</td>
+                        <td>{{ item.quantity }}</td>
+                        <td>{{ item.price }}</td>
+                    </tr>
+                {% endfor %}
+
+                <tr class="footer">
+                    <td></td>
+                    <td colspan="3">Total</td>
+                    <td>{{ order.paid_amount }}</td>
+                </tr>
+            </table>
+
+            <h2>Saul Gadgets</h2>
+
+            <p>Thanks for ordering from us!</p>
+        </div>
+    </body>
+</html>

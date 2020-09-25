@@ -63,7 +63,10 @@ class Product(models.Model):
     def get_rating(self):
         total = sum(int(review['stars']) for review in self.reviews.values())
 
-        return total / self.reviews.count()
+        if self.reviews.count() > 0:
+            return total / self.reviews.count()
+        else:
+            return 0
 
 class ProductImage(models.Model):
     product = models.ForeignKey(Product, related_name='images', on_delete=models.CASCADE)

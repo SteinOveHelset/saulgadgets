@@ -24,7 +24,7 @@
         {% endif %}
         <hr>
         <h1 class="title">{{ product.title }}</h1>
-        <h2 class="subtitle">${{ product.price }}, Stars: {{ product.get_rating|floatformat:1 }}</h2>
+        <h2 class="subtitle">${{ product.price }}, Stars: {% if product.get_rating == 0 %}No ratings yet{% else %}{{ product.get_rating|floatformat:1 }}{% endif %}</h2>
 
         {% if product.description %}
             <p>{{ product.description }}</p>
