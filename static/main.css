@@ -3,7 +3,7 @@ form .helptext {
     color: #ccc;
 }
 
-form ul {
+form ul:not(.errorlist) {
     display: none;
 }
 

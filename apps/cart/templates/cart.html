@@ -105,7 +105,15 @@
                                 <label>E-mail</label>
         
                                 <div class="control">
-                                    <input class="input" type="text" name="email" v-model="email">
+                                    <input class="input" type="email" name="email" v-model="email">
+                                </div>
+                            </div>
+        
+                            <div class="field">
+                                <label>Phone</label>
+        
+                                <div class="control">
+                                    <input class="input" type="text" name="phone" v-model="phone">
                                 </div>
                             </div>
                         </div>
@@ -177,9 +185,10 @@
                 first_name: '{{ first_name }}',
                 last_name: '{{ last_name }}',
                 email: '{{ email }}',
-                address: '',
-                zipcode: '',
-                place: '',
+                address: '{{ address }}',
+                zipcode: '{{ zipcode }}',
+                place: '{{ place }}',
+                phone: '{{ phone }}',
                 products: [{{ productsstring|safe }}],
                 coupon_value: 0,
                 coupon_code: '',
@@ -231,6 +240,7 @@
                     'address': this.address,
                     'zipcode': this.zipcode,
                     'place': this.place,
+                    'phone': this.phone,
                     'coupon_code': this.coupon_code
                 };
 
@@ -258,6 +268,10 @@
 
                 if (data.place === '') {
                     this.errors.push('Place is empty');
+                }
+
+                if (data.phone === '') {
+                    this.errors.push('Phone is empty');
                 }
 
                 if (this.errors.length === 0) {

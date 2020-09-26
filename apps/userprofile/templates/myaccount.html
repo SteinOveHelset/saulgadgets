@@ -11,6 +11,9 @@
 
     <p><strong>Name: </strong>{{ request.user.get_full_name }}</p>
     <p><strong>E-mail: </strong>{{ request.user.email }}</p>
+    <p><strong>Address: </strong>{{ request.user.userprofile.address }}</p>
+    <p><strong>Zip and place: </strong>{{ request.user.userprofile.zipcode }} {{ request.user.userprofile.place }}</p>
+    <p><strong>Phone: </strong>{{ request.user.userprofile.phone }}</p>
 
     <hr>
 
