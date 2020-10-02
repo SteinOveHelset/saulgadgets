@@ -3,9 +3,31 @@
 {% block title %}{{ category.title }} | {% endblock %}
 
 {% block content %}
+    <nav class="breadcrumb" aria-label="breadcrumbs">
+        <ul>
+            <li><a href="{% url 'frontpage' %}">Home</a></li>
+            {% if category.parent %}
+                <li><a href="{% url 'category_detail' category.parent.slug %}">{{ category.parent.title }}</a></li>
+            {% endif %}
+            <li class="is-active"><a href="{% url 'category_detail' category.slug %}">{{ category.title }}</a></li>
+        </ul>
+    </nav>
+
     <h1 class="title">{{ category.title }}</h1>
 
-    {% with products as list_products %}
-        {% include 'parts/product_list.html' %}
-    {% endwith %}
+    {% if category.children.all %}
+        <div class="columns is-multiline">
+            {% for subcategory in category.children.all %}
+                <div class="column is-3">
+                    <h2 class="subtitle">{{ subcategory.title }}</h2>
+
+                    <a href="{% url 'category_detail' subcategory.slug %}">View products</a>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        {% with products as list_products %}
+            {% include 'parts/product_list.html' %}
+        {% endwith %}
+    {% endif %}
 {% endblock %}

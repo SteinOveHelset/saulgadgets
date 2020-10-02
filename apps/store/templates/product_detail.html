@@ -4,6 +4,17 @@
 
 {% block content %}
     <div id="productapp">
+        <nav class="breadcrumb" aria-label="breadcrumbs">
+            <ul>
+                <li><a href="{% url 'frontpage' %}">Home</a></li>
+                {% if product.category.parent %}
+                    <li><a href="{% url 'category_detail' product.category.parent.slug %}">{{ product.category.parent.title }}</a></li>
+                {% endif %}
+                <li><a href="{% url 'category_detail' product.category.slug %}">{{ product.category.title }}</a></li>
+                <li class="is-active"><a href="{% url 'product_detail' product.category.slug product.slug %}">{{ product.title }}</a></li>
+            </ul>
+        </nav>
+
         <div class="columns">
             <div class="column is-4">
                 <figure class="image is-4by3">
