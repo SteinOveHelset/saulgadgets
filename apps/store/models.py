@@ -9,6 +9,7 @@ class Category(models.Model):
     title = models.CharField(max_length=255)
     slug = models.SlugField(max_length=255)
     ordering = models.IntegerField(default=0)
+    is_featured = models.BooleanField(default=False)
 
     class Meta:
         verbose_name_plural = 'Categories'
