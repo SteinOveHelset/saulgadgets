@@ -80,77 +80,76 @@
                     <hr>
                 {% endif %}
 
-                <form v-on:submit.prevent="buy()">
-                    <h2 class="title">Contact information</h2>
+                <h2 class="title">Contact information</h2>
 
-                    <div class="columns">
-                        <div class="column is-6">
-                            <div class="field">
-                                <label>First name</label>
-        
-                                <div class="control">
-                                    <input class="input" type="text" name="first_name" v-model="first_name">
-                                </div>
-                            </div>
-        
-                            <div class="field">
-                                <label>Last name</label>
-        
-                                <div class="control">
-                                    <input class="input" type="text" name="last_name" v-model="last_name">
-                                </div>
-                            </div>
-        
-                            <div class="field">
-                                <label>E-mail</label>
-        
-                                <div class="control">
-                                    <input class="input" type="email" name="email" v-model="email">
-                                </div>
-                            </div>
-        
-                            <div class="field">
-                                <label>Phone</label>
-        
-                                <div class="control">
-                                    <input class="input" type="text" name="phone" v-model="phone">
-                                </div>
+                <div class="columns">
+                    <div class="column is-6">
+                        <div class="field">
+                            <label>First name</label>
+    
+                            <div class="control">
+                                <input class="input" type="text" name="first_name" v-model="first_name">
                             </div>
                         </div>
-
-                        <div class="column is-6">
-                            <div class="field">
-                                <label>Address</label>
-        
-                                <div class="control">
-                                    <input class="input" type="text" name="address" v-model="address">
-                                </div>
+    
+                        <div class="field">
+                            <label>Last name</label>
+    
+                            <div class="control">
+                                <input class="input" type="text" name="last_name" v-model="last_name">
                             </div>
-        
-                            <div class="field">
-                                <label>Zip code</label>
-        
-                                <div class="control">
-                                    <input class="input" type="text" name="zipcode" v-model="zipcode">
-                                </div>
+                        </div>
+    
+                        <div class="field">
+                            <label>E-mail</label>
+    
+                            <div class="control">
+                                <input class="input" type="email" name="email" v-model="email">
                             </div>
-        
-                            <div class="field">
-                                <label>Place</label>
-        
-                                <div class="control">
-                                    <input class="input" type="text" name="place" v-model="place">
-                                </div>
+                        </div>
+    
+                        <div class="field">
+                            <label>Phone</label>
+    
+                            <div class="control">
+                                <input class="input" type="text" name="phone" v-model="phone">
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="field">
-                        <div class="control">
-                            <button class="button is-primary">Check out</button>
+
+                    <div class="column is-6">
+                        <div class="field">
+                            <label>Address</label>
+    
+                            <div class="control">
+                                <input class="input" type="text" name="address" v-model="address">
+                            </div>
+                        </div>
+    
+                        <div class="field">
+                            <label>Zip code</label>
+    
+                            <div class="control">
+                                <input class="input" type="text" name="zipcode" v-model="zipcode">
+                            </div>
+                        </div>
+    
+                        <div class="field">
+                            <label>Place</label>
+    
+                            <div class="control">
+                                <input class="input" type="text" name="place" v-model="place">
+                            </div>
                         </div>
                     </div>
-                </form>
+                </div>
+                
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-primary" v-on:click="buy('stripe')">Pay with stripe</button>
+                        <button class="button is-primary" v-on:click="buy('razorpay')">Pay with razorpay</button>
+                    </div>
+                </div>
             </div>
             <p v-else>Your cart is empty!</p>
         {% else %}
@@ -174,6 +173,7 @@
 
 {% block scripts %}
 <script type="application/javascript" src="https://js.stripe.com/v3/"></script>
+<script type="application/javascript" src="https://checkout.razorpay.com/v1/checkout.js"></script>
 <script>
     var productapp = new Vue({
         el: '#cartapp',
@@ -232,7 +232,7 @@
                     this.showCouponCodeError = true
                 }
             },
-            buy() {
+            buy(gateway) {
                 var data = {
                     'first_name': this.first_name,
                     'last_name': this.last_name,
@@ -241,7 +241,8 @@
                     'zipcode': this.zipcode,
                     'place': this.place,
                     'phone': this.phone,
-                    'coupon_code': this.coupon_code
+                    'coupon_code': this.coupon_code,
+                    'gateway': gateway
                 };
 
                 this.errors = [];
@@ -275,31 +276,99 @@
                 }
 
                 if (this.errors.length === 0) {
-                    var stripe = Stripe('{{ pub_key }}');
+                    if (gateway === 'stripe') {
+                        var stripe = Stripe('{{ pub_key }}');
 
-                    fetch('/api/create_checkout_session/', {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                            'X-CSRFToken': '{{ csrf_token }}'
-                        },
-                        credentials: 'same-origin',
-                        body: JSON.stringify(data)
-                    })
-                    .then(function(response) {
-                        return response.json()
-                    })
-                    .then(function(session) {
-                        return stripe.redirectToCheckout({ sessionId: session.session.id })
-                    })
-                    .then(function(result) {
-                        if (result.error) {
-                            alert(result.error.message)
-                        }
-                    })
-                    .catch(function(error) {
-                        console.log('Error:', error);
-                    });
+                        fetch('/api/create_checkout_session/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify(data)
+                        })
+                        .then(function(response) {
+                            return response.json()
+                        })
+                        .then(function(session) {
+                            return stripe.redirectToCheckout({ sessionId: session.session.id })
+                        })
+                        .then(function(result) {
+                            if (result.error) {
+                                alert(result.error.message)
+                            }
+                        })
+                        .catch(function(error) {
+                            console.log('Error:', error);
+                        });
+                    } else if (gateway === 'razorpay') {
+                        fetch('/api/create_checkout_session/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify(data)
+                        })
+                        .then(function(response) {
+                            return response.json()
+                        })
+                        .then(function(result) {
+                            const order_id = result.order.id;
+                            const amount = result.order.amount;
+
+                            var options = {
+                                'key': '{{ pub_key_razorpay }}',
+                                'amount': amount,
+                                'currency': 'INR',
+                                'name': 'Saul Gadgets',
+                                'description': 'A cool gadget store',
+                                'order_id': order_id,
+                                'handler': function(res) {
+                                    console.log('Handler');
+                                    
+                                    fetch('/api/validate_payment/', {
+                                        method: 'POST',
+                                        headers: {
+                                            'Content-Type': 'application/json',
+                                            'X-CSRFToken': '{{ csrf_token }}'
+                                        },
+                                        credentials: 'same-origin',
+                                        body: JSON.stringify({
+                                            'razorpay_payment_id': res.razorpay_payment_id,
+                                            'razorpay_order_id': res.razorpay_order_id,
+                                            'razorpay_signature': res.razorpay_signature
+                                        })
+                                    })
+                                    .then(function(response) {
+                                        return response.json();
+                                    })
+                                    .then(function(result) {
+                                        window.location.href = '/cart/success/';
+                                    })
+                                    .catch(function(error) {
+                                        console.log('Error:', error);
+                                    });
+                                },
+                                'prefill': {
+                                    'name': data.first_name + ' ' + data.last_name,
+                                    'email': data.email,
+                                    'contact': data.phone
+                                },
+                                'theme': {
+                                    'color': '#333333'
+                                }
+                            };
+
+                            var rzp = new Razorpay(options);
+                            rzp.open();
+                        })
+                        .catch(function(error) {
+                            console.log('Error', error);
+                        });
+                    }
                 }
             },
             incrementQuantity(product_id, quantity, price) {
