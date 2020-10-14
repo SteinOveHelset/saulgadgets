@@ -6,6 +6,78 @@
     <h1 class="title">Search</h1>
     <h2 class="subtitle">Search term: "{{ query }}"</h2>
 
+    <hr>
+
+    <form method="get" action="{% url 'search' %}">
+        <div class="columns is-multiline">
+            <div class="column is-4">
+                <h2 class="is-size-5">Query</h2>
+
+                <div class="field">
+                    <label>Search term</label>
+
+                    <div class="control">
+                        <input type="text" name="query" class="input" value="{{ query }}">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>In stock</label>
+
+                    <div class="control">
+                        <input type="checkbox" name="instock"{% if instock %}checked="checked"{% endif %}>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column is-4">
+                <h2 class="is-size-5">Price range</h2>
+
+                <div class="field">
+                    <label>From</label>
+                    <div class="control">
+                        <input type="number" name="price_from" class="input" value="{{ price_from }}">
+                    </div>
+                </div>
+
+                <div class="field">
+                    <label>To</label>
+                    <div class="control">
+                        <input type="number" name="price_to" class="input" value="{{ price_to }}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="column is-4">
+                <h2 class="is-size-5">Sorting</h2>
+
+                <div class="field">
+                    <label>Select sorting criteria</label>
+
+                    <div class="control">
+                        <div class="select">
+                            <select name="sorting">
+                                <option value="-date_added"{% if sorting == '-date_added' %} selected{% endif %}>Newest first</option>
+                                <option value="price"{% if sorting == 'price' %} selected{% endif %}>Price low-high</option>
+                                <option value="-price"{% if sorting == '-price' %} selected{% endif %}>Price high-low</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="column is-12">
+                <div class="field">
+                    <div class="control">
+                        <button class="button is-success">Search</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <hr>
+
     {% with products as list_products %}
         {% include 'parts/product_list.html' %}
     {% endwith %}
