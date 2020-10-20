@@ -17,6 +17,8 @@ from .models import Product
 from apps.order.models import Order
 from apps.coupon.models import Coupon
 
+from .utilities import decrement_product_quantity, send_order_confirmation
+
 def validate_payment(request):
     data = json.loads(request.body)
     razorpay_payment_id = data['razorpay_payment_id']
@@ -40,27 +42,8 @@ def validate_payment(request):
         order.paid = True
         order.save()
 
-        for item in order.items.all():
-            product = item.product
-            product.num_available = product.num_available - item.quantity
-            product.save()
-        
-        subject = 'Order confirmation'
-        from_email = 'noreply@saulgadgets.com'
-        to = ['mail@saulgadgets.com', order.email]
-        text_content = 'Your order is successful!'
-        html_content = render_to_string('order_confirmation.html', {'order': order})
-
-        pdf = render_to_pdf('order_pdf.html', {'order': order})
-
-        msg = EmailMultiAlternatives(subject, text_content, from_email, to)
-        msg.attach_alternative(html_content, "text/html")
-
-        if pdf:
-            name = 'order_%s.pdf' % order.id
-            msg.attach(name, pdf, 'application/pdf')
-        
-        msg.send()
+        decrement_product_quantity(order)
+        send_order_confirmation(order)
 
     return JsonResponse({'success': True})
 
@@ -82,9 +65,6 @@ def create_checkout_session(request):
     #
 
     cart = Cart(request)
-
-    stripe.api_key = settings.STRIPE_API_KEY_HIDDEN
-
     items = []
     
     for item in cart:
@@ -113,6 +93,7 @@ def create_checkout_session(request):
     order_id = ''
     
     if gateway == 'stripe':
+        stripe.api_key = settings.STRIPE_API_KEY_HIDDEN
         session = stripe.checkout.Session.create(
             payment_method_types=['card'],
             line_items=items,
@@ -125,15 +106,7 @@ def create_checkout_session(request):
     #
     # Create order
 
-    first_name = data['first_name']
-    last_name = data['last_name']
-    email = data['email']
-    address = data['address']
-    zipcode = data['zipcode']
-    place = data['place']
-    phone = data['phone']
-
-    orderid = checkout(request, first_name, last_name, email, address, zipcode, place, phone)
+    orderid = checkout(request, data['first_name'], data['last_name'], data['email'], data['address'], data['zipcode'], data['place'], data['phone'])
 
     total_price = 0.00
 
@@ -156,7 +129,10 @@ def create_checkout_session(request):
         payment_intent = client.order.create(data=data)
 
     order = Order.objects.get(pk=orderid)
-    order.payment_intent = payment_intent['id']
+    if gateway == 'razorpay':
+        order.payment_intent = payment_intent['id']
+    else:
+        order.payment_intent = payment_intent
     order.paid_amount = total_price
     order.used_coupon = coupon_code
     order.save()
@@ -164,32 +140,6 @@ def create_checkout_session(request):
     #
 
     return JsonResponse({'session': session, 'order': payment_intent})
-
-def api_checkout(request):
-    cart = Cart(request)
-
-    data = json.loads(request.body)
-    jsonresponse = {'success': True}
-    first_name = data['first_name']
-    last_name = data['last_name']
-    email = data['email']
-    address = data['address']
-    zipcode = data['zipcode']
-    place = data['place']
-    
-    orderid = checkout(request, first_name, last_name, email, address, zipcode, place)
-
-    paid = True
-
-    if paid == True:
-        order = Order.objects.get(pk=orderid)
-        order.paid = True
-        order.paid_amount = cart.get_total_cost()
-        order.save()
-
-        cart.clear()
-    
-    return JsonResponse(jsonresponse)
 
 def api_add_to_cart(request):
     data = json.loads(request.body)
