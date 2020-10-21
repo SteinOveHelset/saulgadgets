@@ -148,6 +148,8 @@
                     <div class="control">
                         <button class="button is-primary" v-on:click="buy('stripe')">Pay with stripe</button>
                         <button class="button is-primary" v-on:click="buy('razorpay')">Pay with razorpay</button>
+                    
+                        <div id="paypal-button-container" class="mt-4"></div>
                     </div>
                 </div>
             </div>
@@ -174,6 +176,7 @@
 {% block scripts %}
 <script type="application/javascript" src="https://js.stripe.com/v3/"></script>
 <script type="application/javascript" src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script type="application/javascript" src="https://www.paypal.com/sdk/js?client-id={{ pub_key_paypal }}"></script>
 <script>
     var productapp = new Vue({
         el: '#cartapp',
@@ -194,6 +197,61 @@
                 coupon_code: '',
                 showCouponCodeError: false
             }
+        },
+        mounted() {
+            const amount = this.totalCostWithCoupon.toString();
+
+            paypal.Buttons({
+                onClick: () => {
+                    if (this.validateForm() > 0) {
+                        return false;
+                    }
+                },
+                createOrder: function(data, actions) {
+                    return actions.order.create({
+                        purchase_units: [{
+                            amount: {
+                                value: amount
+                            }
+                        }]
+                    })
+                },
+                onApprove: (data, actions) => {
+                    const formdata = {
+                        'first_name': this.first_name,
+                        'last_name': this.last_name,
+                        'email': this.email,
+                        'address': this.address,
+                        'zipcode': this.zipcode,
+                        'place': this.place,
+                        'phone': this.phone,
+                        'coupon_code': this.coupon_code,
+                        'gateway': 'paypal',
+                        'order_id': data.orderID
+                    };
+
+                    return actions.order.capture().then(function(details) {
+                        fetch('/api/create_checkout_session/', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'X-CSRFToken': '{{ csrf_token }}'
+                            },
+                            credentials: 'same-origin',
+                            body: JSON.stringify(formdata)
+                        })
+                        .then(function(response) {
+                            return response.json()
+                        })
+                        .then(function(result) {
+                            window.location.href = '/cart/success/';
+                        })
+                        .catch(function(error) {
+                            console.log('error:', error);
+                        });
+                    });
+                }
+            }).render('#paypal-button-container');
         },
         computed: {
             numItems: function() {

@@ -36,6 +36,7 @@ def cart_detail(request):
         'place': place,
         'pub_key': settings.STRIPE_API_KEY_PUBLISHABLE,
         'pub_key_razorpay': settings.RAZORPAY_API_KEY_PUBLISHABLE,
+        'pub_key_paypal': settings.PAYPAL_API_KEY_PUBLISHABLE,
         'productsstring': productsstring.rstrip(',')
     }
 

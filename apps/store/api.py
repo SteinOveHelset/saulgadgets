@@ -8,6 +8,9 @@ from django.http import JsonResponse, HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from django.template.loader import render_to_string
 
+from paypalcheckoutsdk.core import PayPalHttpClient, SandboxEnvironment
+from paypalcheckoutsdk.orders import OrdersCaptureRequest
+
 from apps.cart.cart import Cart
 from apps.order.views import render_to_pdf
 
@@ -91,6 +94,7 @@ def create_checkout_session(request):
     gateway = data['gateway']
     session = ''
     order_id = ''
+    payment_intent = ''
     
     if gateway == 'stripe':
         stripe.api_key = settings.STRIPE_API_KEY_HIDDEN
@@ -127,15 +131,40 @@ def create_checkout_session(request):
         }
 
         payment_intent = client.order.create(data=data)
+    
+    # PayPal
 
-    order = Order.objects.get(pk=orderid)
-    if gateway == 'razorpay':
-        order.payment_intent = payment_intent['id']
+    if gateway == 'paypal':
+        order_id = data['order_id']
+        environment = SandboxEnvironment(client_id=settings.PAYPAL_API_KEY_PUBLISHABLE, client_secret=settings.PAYPAL_API_KEY_HIDDEN)
+        client = PayPalHttpClient(environment)
+
+        request = OrdersCaptureRequest(order_id)
+        response = client.execute(request)
+
+        order = Order.objects.get(pk=orderid)
+        order.paid_amount = total_price
+        order.used_coupon = coupon_code
+
+        if response.result.status == 'COMPLETED':
+            order.paid = True
+            order.payment_intent = order_id
+            order.save()
+
+            decrement_product_quantity(order)
+            send_order_confirmation(order)
+        else:
+            order.paid = False
+            order.save()
     else:
-        order.payment_intent = payment_intent
-    order.paid_amount = total_price
-    order.used_coupon = coupon_code
-    order.save()
+        order = Order.objects.get(pk=orderid)
+        if gateway == 'razorpay':
+            order.payment_intent = payment_intent['id']
+        else:
+            order.payment_intent = payment_intent
+        order.paid_amount = total_price
+        order.used_coupon = coupon_code
+        order.save()
 
     #
 
