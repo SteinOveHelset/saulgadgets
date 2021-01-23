@@ -16,13 +16,14 @@ class Coupon(models.Model):
         if self.active == False:
             is_active = False
         
-        if self.num_used >= self.num_available and self.num_available != 0:
+        if self.num_used < self.num_available or self.num_available == 0:
             is_active = False
         
         return is_active
     
     def use(self):
         self.num_used = self.num_used + 1
+        self.num_available = self.num_available - 1
 
         if self.num_used == self.num_available:
             self.active = False
