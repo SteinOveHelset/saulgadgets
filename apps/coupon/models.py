@@ -23,6 +23,7 @@ class Coupon(models.Model):
     
     def use(self):
         self.num_used = self.num_used + 1
+        self.num_available = self.num_available - 1
 
         if self.num_used == self.num_available:
             self.active = False
